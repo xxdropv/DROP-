@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Login — Painel DROP VENDAS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{ --bg:#080d18; --panel:#0f1728; --line:rgba(140,175,220,0.14); --blue:#2e8fff; --white:#f2f6fc; --gray:#93a0b8; }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--bg); color:var(--white); font-family:'Inter',system-ui,sans-serif; min-height:100vh;
+    display:flex; align-items:center; justify-content:center; padding:20px;}
+  .box{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:36px 30px; width:100%; max-width:380px;}
+  .logo{font-family:'Rajdhani',sans-serif; font-weight:700; font-size:1.5rem; text-align:center; margin-bottom:4px;}
+  .sub{color:var(--gray); font-size:0.85rem; text-align:center; margin-bottom:26px;}
+  label{font-size:0.82rem; color:var(--gray); display:block; margin:14px 0 6px;}
+  input{width:100%; padding:12px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--white); font-size:0.95rem; font-family:inherit;}
+  input:focus{outline:2px solid var(--blue); outline-offset:1px;}
+  button{width:100%; margin-top:22px; background:var(--blue); color:#fff; border:none; padding:13px; border-radius:8px;
+    font-weight:600; font-size:0.95rem; cursor:pointer; font-family:inherit;}
+  button:hover{background:#1c6fe0;}
+  .err{color:#ff5c5c; font-size:0.85rem; margin-top:14px; text-align:center; display:none;}
+</style>
+</head>
+<body>
+  <div class="box">
+    <div class="logo">DROP VENDAS</div>
+    <div class="sub">Painel administrativo</div>
+    <form id="loginForm">
+      <label for="username">Usuário</label>
+      <input id="username" autocomplete="username" required>
+      <label for="password">Senha</label>
+      <input id="password" type="password" autocomplete="current-password" required>
+      <button type="submit">Entrar</button>
+      <div class="err" id="err"></div>
+    </form>
+  </div>
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', function(e){
+      e.preventDefault();
+      var err = document.getElementById('err');
+      err.style.display = 'none';
+      fetch('/api/login', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: document.getElementById('username').value.trim(), password: document.getElementById('password').value })
+      }).then(function(r){ return r.json().then(function(d){ return { ok: r.ok, data: d }; }); })
+        .then(function(res){
+          if (res.ok){ window.location.href = '/admin'; }
+          else { err.textContent = res.data.error || 'Não foi possível entrar.'; err.style.display = 'block'; }
+        }).catch(function(){ err.textContent = 'Erro de conexão com o servidor.'; err.style.display = 'block'; });
+    });
+  </script>
+</body>
+</html>

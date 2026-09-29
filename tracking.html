@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Acompanhar pedido | DROP VENDAS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{ --bg:#080d18; --panel:#0f1728; --panel-2:#131d33; --line:rgba(140,175,220,0.14); --blue:#2e8fff; --white:#f2f6fc; --gray:#93a0b8; --yellow:#ffd34d; --green:#3ddc84; }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--bg); color:var(--white); font-family:'Inter',system-ui,sans-serif; min-height:100vh; display:grid; place-items:center; padding:20px;}
+  .box{width:min(460px,100%); background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:30px;}
+  h1{font-family:'Rajdhani',sans-serif; font-weight:700; font-size:1.4rem; margin-bottom:2px;}
+  .muted{color:var(--gray); font-size:0.85rem;}
+  .item{margin:22px 0; padding:16px; background:var(--panel-2); border:1px solid var(--line); border-radius:12px;}
+  .item p{margin:6px 0; font-size:0.92rem;}
+  .id-row{padding:12px 0; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; gap:10px; font-size:0.9rem;}
+  .id-row:last-child{border-bottom:0;}
+  .status{font-weight:700; font-size:0.85rem; white-space:nowrap;}
+  .status.yellow{color:var(--yellow);}
+  .status.green{color:var(--green);}
+  button.refresh{margin-top:18px; width:100%; padding:13px; border-radius:8px; border:1px solid var(--blue); background:var(--blue); color:#fff; font-weight:600; font-size:0.95rem; cursor:pointer; font-family:inherit;}
+  button.refresh:hover{background:#1c6fe0;}
+  .error{color:#ff5c5c; text-align:center; padding:20px 0;}
+</style>
+</head>
+<body>
+<main class="box">
+  <h1>DROP VENDAS</h1>
+  <div class="muted">Acompanhamento do pedido</div>
+  <div id="app">Carregando…</div>
+  <button class="refresh" id="refreshBtn">Atualizar status</button>
+</main>
+<script>
+(function(){
+  var token = location.pathname.split('/').pop();
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]; }); }
+  function statusHtml(s){
+    return (s === 'Entregue' || s === 'Pedido entregue')
+      ? '<span class="status green">🟢 ENTREGUE</span>'
+      : (s === 'Enviado' ? '<span class="status yellow">🟡 ENVIADO</span>' : '<span class="status yellow">🟡 AGUARDANDO ENTREGA</span>');
+  }
+  function load(){
+    fetch('/api/pedido/' + encodeURIComponent(token)).then(function(r){
+      return r.json().catch(function(){ return {}; }).then(function(d){ if (!r.ok) throw new Error(d.error || 'Pedido não encontrado.'); return d; });
+    }).then(function(d){
+      var idsHtml = '<div class="id-row"><span>🎮 ID 1: ' + esc(d.ff_id) + '</span>' + statusHtml(d.status1) + '</div>';
+      if (d.ff_id2) idsHtml += '<div class="id-row"><span>🎮 ID 2: ' + esc(d.ff_id2) + '</span>' + statusHtml(d.status2) + '</div>';
+      document.getElementById('app').innerHTML =
+        '<div class="item"><p><b>Pedido #' + d.id + '</b></p><p>📦 ' + esc(d.product_name) + '</p><p>💰 ' + esc(d.price) + '</p>' + idsHtml + '</div>';
+    }).catch(function(e){
+      document.getElementById('app').innerHTML = '<p class="error">' + esc(e.message) + '</p>';
+    });
+  }
+  document.getElementById('refreshBtn').addEventListener('click', load);
+  load();
+  setInterval(load, 15000);
+})();
+</script>
+</body>
+</html>

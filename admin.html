@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DROP VENDAS | Painel ADM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{ --bg:#080d18; --panel:#0f1728; --panel-2:#131d33; --line:#24304a; --blue:#2e8fff; --white:#f2f6fc; --gray:#93a0b8; --red:#ff5c5c; --green:#3ddc84; }
+*{box-sizing:border-box; margin:0; padding:0;}
+body{background:var(--bg); color:var(--white); font-family:'Inter',Arial,sans-serif;}
+h1,h2,.logo,.value{font-family:'Rajdhani',sans-serif;}
+.layout{display:flex; min-height:100vh;}
+.side{width:230px; background:var(--panel); border-right:1px solid var(--line); padding:22px 12px; position:fixed; height:100vh; display:flex; flex-direction:column;}
+.logo{font-size:21px; font-weight:700; padding:8px 12px 28px;}
+.logo b{color:var(--blue);}
+.menu{flex-grow:1;}
+.menu button{display:block; width:100%; border:0; background:transparent; color:var(--gray); text-align:left; padding:12px; border-radius:8px; margin:4px 0; font-size:0.92rem; cursor:pointer; font-family:inherit;}
+.menu button:hover, .menu .on{background:#162744; color:var(--white);}
+.logout-btn{border:0; background:transparent; color:var(--red); text-align:left; padding:12px; border-radius:8px; cursor:pointer; font-family:inherit; font-size:0.88rem;}
+.logout-btn:hover{background:#2a1420;}
+.main{margin-left:230px; width:calc(100% - 230px); padding:28px;}
+.top{display:flex; justify-content:space-between; align-items:center; margin-bottom:22px; flex-wrap:wrap; gap:10px;}
+h1{font-size:26px; margin:0;}
+.muted{color:var(--gray); font-size:13px;}
+.cards{display:grid; grid-template-columns:repeat(4,1fr); gap:14px;}
+.card,.box{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:20px;}
+.label{color:var(--gray); font-size:13px;}
+.value{font-size:25px; font-weight:700; margin:8px 0;}
+.grid2{display:grid; grid-template-columns:2fr 1fr; gap:16px; margin-top:16px;}
+.box h2{font-size:17px; margin-bottom:12px;}
+table{width:100%; border-collapse:collapse;}
+th,td{text-align:left; padding:11px 7px; border-bottom:1px solid var(--line); font-size:13px;}
+th{color:var(--gray); font-weight:600;}
+.tag{padding:5px 8px; border-radius:20px; font-size:11px; background:#15304f; color:var(--blue); display:inline-block;}
+.btn{border:0; border-radius:8px; background:var(--blue); color:#fff; padding:9px 13px; cursor:pointer; font-family:inherit; font-size:0.85rem; font-weight:600;}
+.btn:hover{background:#1c6fe0;}
+.btn-ghost{background:transparent; border:1px solid var(--line); color:var(--white);}
+.btn-danger{background:transparent; border:1px solid rgba(255,92,92,.4); color:var(--red);}
+.btn-sm{padding:6px 10px; font-size:0.78rem;}
+select{padding:7px 8px; border-radius:6px; border:1px solid var(--line); background:var(--panel-2); color:var(--white); font-family:inherit; font-size:0.82rem;}
+.products{display:grid; grid-template-columns:repeat(3,1fr); gap:12px;}
+.product{background:var(--panel-2); border:1px solid var(--line); padding:15px; border-radius:10px; display:flex; flex-direction:column; gap:6px;}
+.product img{width:100%; height:100px; object-fit:cover; border-radius:8px; background:var(--panel);}
+.product .price{color:var(--blue); font-weight:700; margin:4px 0;}
+.product .row-btns{display:flex; gap:6px; margin-top:6px;}
+.product .row-btns .btn{flex:1;}
+.badge-off{color:var(--gray); font-size:0.75rem;}
+.section{display:none;}
+.active{display:block;}
+.form{display:grid; gap:12px; max-width:600px;}
+input,textarea{width:100%; padding:11px; border-radius:8px; border:1px solid var(--line); background:var(--panel-2); color:#fff; font-family:inherit; font-size:0.9rem;}
+label{font-size:0.8rem; color:var(--gray); display:block; margin-bottom:4px;}
+.form-row{display:flex; gap:10px;}
+.form-row > div{flex:1;}
+.variant-item{background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:10px; margin-bottom:8px;}
+.variant-item .form-row{align-items:flex-end;}
+.check{display:flex; align-items:center; gap:6px; font-size:0.8rem; color:var(--gray);}
+.remove-link{color:var(--red); background:none; border:none; font-size:0.76rem; cursor:pointer; font-family:inherit; white-space:nowrap;}
+.toast{position:fixed; left:50%; bottom:24px; transform:translateX(-50%); background:var(--green); color:#04101c; padding:10px 18px; border-radius:8px; font-size:0.85rem; font-weight:600; z-index:300; display:none;}
+.hint{font-size:0.78rem; color:var(--gray); margin-top:-4px;}
+.tabs2{display:flex; gap:8px; margin-bottom:16px;}
+.tabs2 button{background:var(--panel-2); border:1px solid var(--line); color:var(--gray); padding:8px 14px; border-radius:20px; font-size:0.8rem; cursor:pointer; font-family:inherit;}
+.tabs2 button.on{border-color:var(--blue); color:var(--blue);}
+@media(max-width:700px){
+  .side{width:65px;} .logo{font-size:0;} .logo b{font-size:19px;} .menu button{font-size:0; text-align:center;} .menu button:first-letter{font-size:18px;}
+  .main{margin-left:65px; width:calc(100% - 65px); padding:16px;}
+  .cards{grid-template-columns:repeat(2,1fr);} .grid2,.products{grid-template-columns:1fr;} h1{font-size:21px;}
+  .form-row{flex-direction:column;}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="side">
+    <div class="logo">DROP <b>VENDAS</b></div>
+    <div class="menu">
+      <button class="on" data-tab="dash">📊 Dashboard</button>
+      <button data-tab="orders">🛒 Pedidos</button>
+      <button data-tab="products">📦 Produtos</button>
+      <button data-tab="clients">👥 Clientes</button>
+      <button data-tab="config">⚙️ Configurações</button>
+    </div>
+    <button class="logout-btn" id="logoutBtn">⏻ Sair</button>
+  </aside>
+
+  <main class="main">
+    <!-- Dashboard -->
+    <section id="dash" class="section active">
+      <div class="top"><div><h1>Dashboard</h1><span class="muted">Visão geral da DROP VENDAS</span></div><button class="btn" id="refreshDash">Atualizar</button></div>
+      <div class="cards">
+        <div class="card"><span class="label">Pedidos hoje</span><div class="value" id="kpiOrdersToday">—</div></div>
+        <div class="card"><span class="label">Pendentes</span><div class="value" id="kpiPending">—</div></div>
+        <div class="card"><span class="label">Vendas hoje</span><div class="value" id="kpiSalesToday">—</div></div>
+        <div class="card"><span class="label">Clientes</span><div class="value" id="kpiClients">—</div></div>
+      </div>
+      <div class="grid2">
+        <div class="box"><h2>Últimos pedidos</h2><table id="recentOrdersTable"><thead><tr><th>Pedido</th><th>Produto</th><th>Valor</th><th>Status</th></tr></thead><tbody></tbody></table></div>
+        <div class="box"><h2>Atalhos</h2><button class="btn" data-goto="orders">Ver pedidos</button></div>
+      </div>
+    </section>
+
+    <!-- Pedidos -->
+    <section id="orders" class="section">
+      <div class="top"><div><h1>Pedidos</h1><span class="muted">Gerencie os pedidos recebidos</span></div><button class="btn btn-ghost" id="refreshOrders">Atualizar</button></div>
+      <div class="box" style="overflow-x:auto">
+        <table id="ordersTable">
+          <thead><tr><th>ID</th><th>Produto</th><th>Valor</th><th>ID(s) Free Fire</th><th>WhatsApp do cliente</th><th>Data</th><th>Status</th><th>Acompanhamento</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="box" style="margin-top:16px;">
+        <div class="top" style="margin-bottom:10px;">
+          <div><h2>📋 IDs de Reserva de Passe</h2><span class="muted">Uma única lista, em ordem de pedido.</span></div>
+          <button class="btn" id="copyPassIds">📋 Copiar todos os IDs</button>
+        </div>
+        <pre id="passIdsList" style="white-space:pre-wrap; background:var(--panel-2); border:1px solid var(--line); padding:14px; border-radius:10px; margin:0; color:#fff; font-family:inherit; font-size:0.85rem;">Carregando…</pre>
+      </div>
+    </section>
+
+    <!-- Produtos -->
+    <section id="products" class="section">
+      <div class="top"><div><h1>Produtos</h1><span class="muted">Gerencie seu catálogo</span></div><button class="btn" id="newProductBtn">+ Novo produto</button></div>
+
+      <div class="box" id="productFormBox" style="display:none; margin-bottom:18px;">
+        <h2 id="productFormTitle">Novo produto</h2>
+        <form class="form" id="productForm">
+          <input type="hidden" id="p_id">
+          <div class="form-row">
+            <div><label>Categoria</label><input id="p_category" placeholder="Ex: DIAMANTES" required></div>
+            <div><label>Selo (opcional)</label><input id="p_badge" placeholder="Ex: Mais vendido"></div>
+          </div>
+          <div><label>Nome</label><input id="p_name" required></div>
+          <div><label>Descrição (opcional)</label><input id="p_desc"></div>
+          <div><label>Imagem (opcional)</label><input id="p_image" type="file" accept="image/*"><p class="hint">Deixe em branco para manter a imagem atual.</p></div>
+          <label class="check"><input type="checkbox" id="p_active" checked> Produto ativo (visível na loja)</label>
+
+          <label style="margin-top:6px;">Preço(s)</label>
+          <div id="p_variants"></div>
+          <button type="button" class="btn btn-ghost btn-sm" id="addVariantBtn">+ Adicionar variação de preço</button>
+
+          <div class="form-row" style="margin-top:10px;">
+            <button type="submit" class="btn">Salvar produto</button>
+            <button type="button" class="btn btn-ghost" id="cancelProductBtn">Cancelar</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="products" id="productsGrid"></div>
+    </section>
+
+    <!-- Clientes -->
+    <section id="clients" class="section">
+      <div class="top"><div><h1>Clientes</h1><span class="muted">Baseado nos pedidos recebidos</span></div></div>
+      <div class="box"><table id="customersTable"><thead><tr><th>ID Free Fire</th><th>WhatsApp</th><th>Pedidos</th><th>Último pedido</th></tr></thead><tbody></tbody></table></div>
+    </section>
+
+    <!-- Configurações -->
+    <section id="config" class="section">
+      <h1>Configurações</h1>
+      <div class="box" style="margin-top:20px; max-width:520px;">
+        <form class="form" id="settingsForm">
+          <div><label>Nome da loja</label><input id="s_name"></div>
+          <div><label>WhatsApp (link wa.me)</label><input id="s_whatsapp"><p class="hint">Use o formato direto <code>https://wa.me/55DDDNUMERO</code> (só números). Links curtos do tipo <code>wa.me/message/CÓDIGO</code> não abrem com a mensagem já preenchida.</p></div>
+          <div><label>Chave PIX</label><input id="s_pix"></div>
+          <button type="submit" class="btn">Salvar configurações</button>
+        </form>
+      </div>
+
+      <div class="box" style="margin-top:20px; max-width:520px;">
+        <h2>Trocar senha do painel</h2>
+        <div class="tabs2">
+          <button type="button" class="on" data-pwmode="current">Sei minha senha atual</button>
+          <button type="button" data-pwmode="recovery">Esqueci — usar código mestre</button>
+        </div>
+        <form class="form" id="passwordForm">
+          <div id="pw_currentWrap"><label>Senha atual</label><input id="pw_current" type="password"></div>
+          <div id="pw_recoveryWrap" style="display:none;"><label>Código mestre</label><input id="pw_recovery" type="password"></div>
+          <div><label>Nova senha</label><input id="pw_new" type="password" required></div>
+          <button type="submit" class="btn">Trocar senha</button>
+        </form>
+      </div>
+    </section>
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+<script src="/js/admin.js"></script>
+</body>
+</html>
